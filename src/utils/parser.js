@@ -26,9 +26,9 @@ const parse = ({ contents }) => {
       title,
       description: postsDescriptions[index],
       link: postsLinks[index],
-    }))
+    })),
   };
   return parsedData;
 };
-  
+
 export default parse;

@@ -1,5 +1,4 @@
 import i18next from 'i18next';
-import { includes } from 'lodash';
 
 const input = document.querySelector('input');
 const submitButton = document.querySelector('button[type=submit]');
@@ -25,7 +24,7 @@ const renderFeedbackMessage = (state, path, value) => {
       input.classList.remove('is-invalid');
       input.value = '';
     }
-  } 
+  }
 };
 
 const disabledSubmitButton = (status) => {
@@ -42,7 +41,7 @@ const renderCard = (type) => {
   const container = type === 'feeds' ? feedsDiv : postsDiv;
   while (container.firstChild) {
     container.removeChild(container.firstChild);
-  };
+  }
   const cardDiv = document.createElement('div');
   cardDiv.classList.add('card', 'border-0');
   container.prepend(cardDiv);
@@ -59,7 +58,7 @@ const renderCard = (type) => {
   const ulEl = document.createElement('ul');
   ulEl.classList.add('list-group', 'border-0', 'rounded-0');
   cardDiv.append(ulEl);
-  
+
   return container;
 };
 
@@ -149,7 +148,7 @@ const render = (state, path, value) => {
       viewPosts(state, value);
       break;
     default:
-      throw new Error(`someError`);
+      throw new Error('someError');
   }
 };
 

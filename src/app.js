@@ -1,11 +1,11 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
 import i18next from 'i18next';
+import axios from 'axios';
+import { uniqueId } from 'lodash';
 import ru from './locales/ru.js';
 import render from './view.js';
-import axios from 'axios';
 import parse from './utils/parser.js';
-import { uniqueId } from 'lodash';
 
 export default () => {
   i18next.init({
@@ -13,7 +13,7 @@ export default () => {
     debug: true,
     resources: {
       ru,
-    }
+    },
   })
     .then(() => {
       yup.setLocale({
@@ -25,7 +25,7 @@ export default () => {
         },
       });
     });
-  
+
   const schema = (feeds) => yup.string().url().notOneOf(feeds).required();
 
   const state = {
@@ -36,7 +36,7 @@ export default () => {
     error: null,
     visitedLinks: [],
   };
- 
+
   // View layer
   const watchedState = onChange(state, (path, value) => {
     render(state, path, value);
@@ -62,8 +62,8 @@ export default () => {
         watchedState.posts.unshift(...postsWithId);
         watchedState.status = 'success';
       })
-      .catch((e) => {
-        watchedState.error = i18next.t(`errors.${e.message}`);
+      .catch((err) => {
+        watchedState.error = i18next.t(`errors.${err.message}`);
         watchedState.status = 'invalid';
       });
   });
@@ -75,5 +75,5 @@ export default () => {
         watchedState.visitedLinks.push(id);
       }
     }
-  }); 
+  });
 };
