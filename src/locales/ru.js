@@ -3,7 +3,7 @@ export default {
     errors: {
       notOneOfError: 'RSS уже существует',
       notValidUrl: 'Ссылка должна быть валидным URL',
-      someError: 'Неизвестная ошибка',
+      someError: 'Упс...',
       notRssSource: 'Источник не содержит RSS',
     },
     success: {
