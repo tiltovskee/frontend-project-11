@@ -4,7 +4,7 @@ export default {
       notOneOfError: 'RSS уже существует',
       notValidUrl: 'Ссылка должна быть валидным URL',
       someError: 'Упс...',
-      notRssSource: 'Источник не содержит RSS',
+      notRssSource: 'Ресурс не содержит валидный RSS',
     },
     success: {
       validUrl: 'RSS успешно загружен',
