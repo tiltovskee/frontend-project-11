@@ -6,6 +6,7 @@ import { uniqueId } from 'lodash';
 import ru from './locales/ru.js';
 import render from './view.js';
 import parse from './utils/parser.js';
+import updatePosts from './utils/updatePosts.js';
 
 export default () => {
   i18next.init({
@@ -76,4 +77,5 @@ export default () => {
       }
     }
   });
+  updatePosts(watchedState);
 };
