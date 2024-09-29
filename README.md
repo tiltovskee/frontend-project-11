@@ -5,5 +5,20 @@
 [![Actions Status](https://github.com/tiltovskee/frontend-project-11/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/tiltovskee/frontend-project-11/actions)
 
 Service for combining and checking RSS feeds for new posts. All added sources are updated every 5 seconds, new posts are added to the general list.
+[RSS aggregator app](https://frontend-project-11-iota-seven.vercel.app/)
 
-[Deployed project](https://frontend-project-11-iota-seven.vercel.app/)
+## Setup
+
+```bash
+git clone https://github.com/tiltovskee/frontend-project-11.git
+
+cd frontend-project-11
+
+make install
+```
+
+## Run local app
+
+```bash
+make develop
+```
