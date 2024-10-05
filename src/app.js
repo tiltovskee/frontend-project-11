@@ -25,57 +25,69 @@ export default () => {
           url: 'notValidUrl',
         },
       });
-    });
+    })
+    .then(() => {
+      const schema = (feeds) => yup.string().url().notOneOf(feeds).required();
 
-  const schema = (feeds) => yup.string().url().notOneOf(feeds).required();
+      const elements = {
+        input: document.querySelector('input'),
+        submitButton: document.querySelector('button[type=submit]'),
+        feedsDiv: document.querySelector('div.feeds'),
+        postsDiv: document.querySelector('div.posts'),
+        modalTitle: document.querySelector('.modal-title'),
+        modalBody: document.querySelector('.modal-body'),
+        modalBtn: document.querySelector('.modal-footer > .full-article'),
+        feedbackMessage: document.querySelector('.feedback'),
+      };
 
-  const state = {
-    status: 'valid',
-    links: [],
-    feeds: [],
-    posts: [],
-    error: null,
-    visitedLinks: [],
-  };
+      const state = {
+        status: 'valid',
+        links: [],
+        feeds: [],
+        posts: [],
+        error: null,
+        visitedLinks: [],
+      };
 
-  // View layer
-  const watchedState = onChange(state, (path, value) => {
-    render(state, path, value);
-  });
-
-  // Controller layer
-  document.querySelector('form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const rssLink = formData.get('url');
-    schema(state.links).validate(rssLink)
-      .then((url) => {
-        watchedState.status = 'loading';
-        const newUrl = new URL(`https://allorigins.hexlet.app/get?disableCache=true&url=${url}`);
-        return axios.get(newUrl);
-      })
-      .then(({ data }) => {
-        const { feed, posts } = parse(data);
-        const postsWithId = posts.map((post) => ({ ...post, id: uniqueId() }));
-        state.links.push(rssLink);
-        watchedState.error = null;
-        watchedState.feeds.unshift(feed);
-        watchedState.posts.unshift(...postsWithId);
-        watchedState.status = 'success';
-      })
-      .catch((err) => {
-        watchedState.error = i18next.t(`errors.${err.message}`);
-        watchedState.status = 'invalid';
+      // View layer
+      const watchedState = onChange(state, (path, value) => {
+        render(elements, state, path, value);
       });
-  });
-  const postContainer = document.querySelector('.posts');
-  postContainer.addEventListener('click', (e) => {
-    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
-      const { id } = e.target.dataset;
-      if (!watchedState.visitedLinks.includes(id)) {
-        watchedState.visitedLinks.push(id);
-      }
-    }
-  });
-  updatePosts(watchedState);
+
+      // Controller layer
+      document.querySelector('form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        watchedState.status = 'loading';
+        const formData = new FormData(e.target);
+        const rssLink = formData.get('url');
+        schema(state.links).validate(rssLink)
+          .then((url) => {
+            const newUrl = new URL(`https://allorigins.hexlet.app/get?disableCache=true&url=${url}`);
+            return axios.get(newUrl);
+          })
+          .then(({ data }) => {
+            const { feed, posts } = parse(data);
+            const postsWithId = posts.map((post) => ({ ...post, id: uniqueId() }));
+            state.links.push(rssLink);
+            watchedState.error = null;
+            watchedState.feeds.unshift(feed);
+            watchedState.posts.unshift(...postsWithId);
+            watchedState.status = 'success';
+          })
+          .catch((err) => {
+            watchedState.error = i18next.t(`errors.${err.message}`);
+            watchedState.status = 'invalid';
+          });
+      });
+      const postContainer = document.querySelector('.posts');
+      postContainer.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
+          const { id } = e.target.dataset;
+          if (!watchedState.visitedLinks.includes(id)) {
+            watchedState.visitedLinks.push(id);
+          }
+        }
+      });
+      updatePosts(watchedState);
+    });
 };

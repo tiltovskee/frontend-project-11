@@ -1,15 +1,15 @@
 import i18next from 'i18next';
 
-const input = document.querySelector('input');
-const submitButton = document.querySelector('button[type=submit]');
-const feedsDiv = document.querySelector('div.feeds');
-const postsDiv = document.querySelector('div.posts');
-const modalTitle = document.querySelector('.modal-title');
-const modalBody = document.querySelector('.modal-body');
-const modalBtn = document.querySelector('.modal-footer > .full-article');
+// const input = document.querySelector('input');
+// const submitButton = document.querySelector('button[type=submit]');
+// const feedsDiv = document.querySelector('div.feeds');
+// const postsDiv = document.querySelector('div.posts');
+// const modalTitle = document.querySelector('.modal-title');
+// const modalBody = document.querySelector('.modal-body');
+// const modalBtn = document.querySelector('.modal-footer > .full-article');
 
-const renderFeedbackMessage = (state, path, value) => {
-  const feedbackMessage = document.querySelector('.feedback');
+const renderFeedbackMessage = (elements, state, path, value) => {
+  const { input, feedbackMessage } = elements;
   if (path === 'status') {
     feedbackMessage.classList.remove('text-danger', 'text-success');
     feedbackMessage.textContent = '';
@@ -27,7 +27,8 @@ const renderFeedbackMessage = (state, path, value) => {
   }
 };
 
-const disabledSubmitButton = (status) => {
+const disabledSubmitButton = (elements, status) => {
+  const { input, submitButton } = elements;
   if (status === 'loading') {
     submitButton.setAttribute('disabled', true);
     input.disabled = true;
@@ -37,7 +38,8 @@ const disabledSubmitButton = (status) => {
   }
 };
 
-const renderCard = (type) => {
+const renderCard = (elements, type) => {
+  const { feedsDiv, postsDiv } = elements;
   const container = type === 'feeds' ? feedsDiv : postsDiv;
   while (container.firstChild) {
     container.removeChild(container.firstChild);
@@ -62,8 +64,8 @@ const renderCard = (type) => {
   return container;
 };
 
-const renderFeeds = (value) => {
-  const card = renderCard('feeds');
+const renderFeeds = (elements, value) => {
+  const card = renderCard(elements, 'feeds');
   const ulEl = card.querySelector('.list-group');
   value.forEach((feed) => {
     const { title, description } = feed;
@@ -74,8 +76,8 @@ const renderFeeds = (value) => {
   });
 };
 
-const renderPosts = (state, value) => {
-  const card = renderCard('posts');
+const renderPosts = (elements, state, value) => {
+  const card = renderCard(elements, 'posts');
   const ulEl = card.querySelector('.list-group');
   value.forEach((post) => {
     const { title, link, id } = post;
@@ -111,7 +113,8 @@ const renderPosts = (state, value) => {
   });
 };
 
-const viewPosts = (state, visitedLinksList) => {
+const viewPosts = (elements, state, visitedLinksList) => {
+  const { modalBtn, modalTitle, modalBody } = elements;
   const { posts } = state;
   const visitedLinkId = visitedLinksList[visitedLinksList.length - 1];
   const currentLink = document.querySelector(`a[data-id="${visitedLinkId}"]`);
@@ -126,26 +129,26 @@ const viewPosts = (state, visitedLinksList) => {
   modalBody.textContent = description;
 };
 
-const render = (state, path, value) => {
+const render = (elements, state, path, value) => {
   switch (path) {
     case 'status':
-      renderFeedbackMessage(state, path, value);
-      disabledSubmitButton(value);
+      renderFeedbackMessage(elements, state, path, value);
+      disabledSubmitButton(elements, value);
       break;
     case 'feeds':
-      renderFeedbackMessage(state, path, value);
-      renderFeeds(value);
-      input.value = '';
-      input.focus();
+      renderFeedbackMessage(elements, state, path, value);
+      renderFeeds(elements, value);
+      elements.input.value = '';
+      elements.input.focus();
       break;
     case 'posts':
-      renderPosts(state, value);
+      renderPosts(elements, state, value);
       break;
     case 'error':
-      renderFeedbackMessage(state, path, value);
+      renderFeedbackMessage(elements, state, path, value);
       break;
     case 'visitedLinks':
-      viewPosts(state, value);
+      viewPosts(elements, state, value);
       break;
     default:
       throw new Error('someError');
