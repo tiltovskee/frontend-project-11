@@ -1,12 +1,12 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
 import i18next from 'i18next';
-import axios from 'axios';
 import { uniqueId } from 'lodash';
 import ru from './locales/ru.js';
 import render from './view.js';
 import parse from './utils/parser.js';
 import updatePosts from './utils/updatePosts.js';
+import fetch from './utils/fetch.js';
 
 export default () => {
   i18next.init({
@@ -41,42 +41,58 @@ export default () => {
       };
 
       const state = {
-        status: 'valid',
-        links: [],
+        appStatus: {
+          loading: 'ready',
+          error: null,
+        },
         feeds: [],
         posts: [],
-        error: null,
         visitedLinks: [],
       };
 
-      // View layer
       const watchedState = onChange(state, (path, value) => {
         render(elements, state, path, value);
       });
 
-      // Controller layer
       document.querySelector('form').addEventListener('submit', (e) => {
         e.preventDefault();
-        watchedState.status = 'loading';
         const formData = new FormData(e.target);
         const rssLink = formData.get('url');
-        schema(state.links).validate(rssLink)
-          .then((url) => {
-            const newUrl = new URL(`https://allorigins.hexlet.app/get?disableCache=true&url=${url}`);
-            return axios.get(newUrl);
-          })
+        watchedState.appStatus.loading = 'in progress';
+        const links = state.feeds.map((feed) => feed.link);
+        schema(links).validate(rssLink)
+          .then(() => fetch(rssLink))
           .then(({ data }) => {
-            const { feed, posts } = parse(data);
-            const postsWithId = posts.map((post) => ({ ...post, id: uniqueId() }));
-            state.links.push(rssLink);
-            watchedState.error = null;
-            watchedState.feeds.unshift(feed);
-            watchedState.posts.unshift(...postsWithId);
-            watchedState.status = 'success';
+            const parsedData = parse(data);
+
+            const dataTitles = Array.from(parsedData.querySelectorAll('title')).map((item) => item.textContent);
+            const [feedTitle, ...postsTitles] = dataTitles;
+            const dataDescriptions = Array.from(parsedData.querySelectorAll('description')).map((item) => item.textContent);
+            const [feedDescription, ...postsDescriptions] = dataDescriptions;
+            const dataLinks = Array.from(parsedData.querySelectorAll('link')).map((item) => item.textContent);
+            const [feedLink, ...postsLinks] = dataLinks;
+
+            const feed = {
+              title: feedTitle,
+              description: feedDescription,
+              link: feedLink,
+            };
+            const posts = postsTitles.map((title, index) => ({
+              title,
+              description: postsDescriptions[index],
+              link: postsLinks[index],
+              id: uniqueId(),
+            }));
+
+            watchedState.appStatus.error = null;
+            watchedState.feeds.unshift({ ...feed, link: rssLink });
+            watchedState.posts.unshift(...posts);
+            watchedState.appStatus.loading = 'success';
+            elements.input.focus();
           })
           .catch((err) => {
-            watchedState.error = i18next.t(`errors.${err.message}`);
-            watchedState.status = 'invalid';
+            watchedState.appStatus.error = i18next.t(`errors.${err.message}`);
+            watchedState.appStatus.loading = 'failed';
           });
       });
       const postContainer = document.querySelector('.posts');

@@ -1,22 +1,14 @@
 import i18next from 'i18next';
 
-// const input = document.querySelector('input');
-// const submitButton = document.querySelector('button[type=submit]');
-// const feedsDiv = document.querySelector('div.feeds');
-// const postsDiv = document.querySelector('div.posts');
-// const modalTitle = document.querySelector('.modal-title');
-// const modalBody = document.querySelector('.modal-body');
-// const modalBtn = document.querySelector('.modal-footer > .full-article');
-
 const renderFeedbackMessage = (elements, state, path, value) => {
   const { input, feedbackMessage } = elements;
-  if (path === 'status') {
+  if (path === 'appStatus.loading') {
     feedbackMessage.classList.remove('text-danger', 'text-success');
     feedbackMessage.textContent = '';
-    if (value === 'invalid') {
+    if (value === 'failed') {
       input.classList.add('is-invalid');
       feedbackMessage.classList.add('text-danger');
-      feedbackMessage.textContent = state.error;
+      feedbackMessage.textContent = state.appStatus.error;
     }
     if (value === 'success') {
       feedbackMessage.classList.add('text-success');
@@ -29,7 +21,7 @@ const renderFeedbackMessage = (elements, state, path, value) => {
 
 const disabledSubmitButton = (elements, status) => {
   const { input, submitButton } = elements;
-  if (status === 'loading') {
+  if (status === 'in progress') {
     submitButton.setAttribute('disabled', true);
     input.disabled = true;
   } else {
@@ -113,7 +105,7 @@ const renderPosts = (elements, state, value) => {
   });
 };
 
-const viewPosts = (elements, state, visitedLinksList) => {
+const fillModal = (elements, state, visitedLinksList) => {
   const { modalBtn, modalTitle, modalBody } = elements;
   const { posts } = state;
   const visitedLinkId = visitedLinksList[visitedLinksList.length - 1];
@@ -131,24 +123,22 @@ const viewPosts = (elements, state, visitedLinksList) => {
 
 const render = (elements, state, path, value) => {
   switch (path) {
-    case 'status':
+    case 'appStatus.loading':
       renderFeedbackMessage(elements, state, path, value);
       disabledSubmitButton(elements, value);
       break;
     case 'feeds':
       renderFeedbackMessage(elements, state, path, value);
       renderFeeds(elements, value);
-      elements.input.value = '';
-      elements.input.focus();
       break;
     case 'posts':
       renderPosts(elements, state, value);
       break;
-    case 'error':
+    case 'appStatus.error':
       renderFeedbackMessage(elements, state, path, value);
       break;
     case 'visitedLinks':
-      viewPosts(elements, state, value);
+      fillModal(elements, state, value);
       break;
     default:
       throw new Error('someError');
