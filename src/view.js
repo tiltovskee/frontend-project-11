@@ -2,13 +2,13 @@ import i18next from 'i18next';
 
 const renderFeedbackMessage = (elements, state, path, value) => {
   const { input, feedbackMessage } = elements;
-  if (path === 'appStatus.loading') {
+  if (path === 'loadingProcess.status') {
     feedbackMessage.classList.remove('text-danger', 'text-success');
     feedbackMessage.textContent = '';
     if (value === 'failed') {
       input.classList.add('is-invalid');
       feedbackMessage.classList.add('text-danger');
-      feedbackMessage.textContent = state.appStatus.error;
+      feedbackMessage.textContent = state.loadingProcess.error;
     }
     if (value === 'success') {
       feedbackMessage.classList.add('text-success');
@@ -27,6 +27,7 @@ const disabledSubmitButton = (elements, status) => {
   } else {
     submitButton.removeAttribute('disabled');
     input.disabled = false;
+    input.focus();
   }
 };
 
@@ -123,20 +124,20 @@ const fillModal = (elements, state, visitedLinksList) => {
 
 const render = (elements, state, path, value) => {
   switch (path) {
-    case 'appStatus.loading':
+    case 'loadingProcess.status':
+    case 'loadingProcess.error':
       renderFeedbackMessage(elements, state, path, value);
       disabledSubmitButton(elements, value);
       break;
     case 'feeds':
-      renderFeedbackMessage(elements, state, path, value);
       renderFeeds(elements, value);
       break;
     case 'posts':
       renderPosts(elements, state, value);
       break;
-    case 'appStatus.error':
-      renderFeedbackMessage(elements, state, path, value);
-      break;
+    // case 'loadingProcess.error':
+    //   renderFeedbackMessage(elements, state, path, value);
+    //   break;
     case 'visitedLinks':
       fillModal(elements, state, value);
       break;

@@ -25,8 +25,7 @@ export default () => {
           url: 'notValidUrl',
         },
       });
-    })
-    .then(() => {
+
       const schema = (feeds) => yup.string().url().notOneOf(feeds).required();
 
       const elements = {
@@ -41,8 +40,8 @@ export default () => {
       };
 
       const state = {
-        appStatus: {
-          loading: 'ready',
+        loadingProcess: {
+          status: 'ready',
           error: null,
         },
         feeds: [],
@@ -58,41 +57,33 @@ export default () => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const rssLink = formData.get('url');
-        watchedState.appStatus.loading = 'in progress';
+        watchedState.loadingProcess.status = 'in progress';
         const links = state.feeds.map((feed) => feed.link);
         schema(links).validate(rssLink)
           .then(() => fetch(rssLink))
           .then(({ data }) => {
             const parsedData = parse(data);
 
-            const dataTitles = Array.from(parsedData.querySelectorAll('title')).map((item) => item.textContent);
-            const [feedTitle, ...postsTitles] = dataTitles;
-            const dataDescriptions = Array.from(parsedData.querySelectorAll('description')).map((item) => item.textContent);
-            const [feedDescription, ...postsDescriptions] = dataDescriptions;
-            const dataLinks = Array.from(parsedData.querySelectorAll('link')).map((item) => item.textContent);
-            const [feedLink, ...postsLinks] = dataLinks;
-
             const feed = {
-              title: feedTitle,
-              description: feedDescription,
-              link: feedLink,
+              title: parsedData.feedTitle,
+              description: parsedData.feedDescription,
+              link: parsedData.feedLink,
             };
-            const posts = postsTitles.map((title, index) => ({
+            const posts = parsedData.postsTitles.map((title, index) => ({
               title,
-              description: postsDescriptions[index],
-              link: postsLinks[index],
+              description: parsedData.postsDescriptions[index],
+              link: parsedData.postsLinks[index],
               id: uniqueId(),
             }));
 
-            watchedState.appStatus.error = null;
+            watchedState.loadingProcess.error = null;
             watchedState.feeds.unshift({ ...feed, link: rssLink });
             watchedState.posts.unshift(...posts);
-            watchedState.appStatus.loading = 'success';
-            elements.input.focus();
+            watchedState.loadingProcess.status = 'success';
           })
           .catch((err) => {
-            watchedState.appStatus.error = i18next.t(`errors.${err.message}`);
-            watchedState.appStatus.loading = 'failed';
+            watchedState.loadingProcess.error = i18next.t(`errors.${err.message}`);
+            watchedState.loadingProcess.status = 'failed';
           });
       });
       const postContainer = document.querySelector('.posts');
