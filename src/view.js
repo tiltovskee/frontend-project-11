@@ -135,9 +135,6 @@ const render = (elements, state, path, value) => {
     case 'posts':
       renderPosts(elements, state, value);
       break;
-    // case 'loadingProcess.error':
-    //   renderFeedbackMessage(elements, state, path, value);
-    //   break;
     case 'visitedLinks':
       fillModal(elements, state, value);
       break;
